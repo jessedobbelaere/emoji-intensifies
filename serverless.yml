@@ -1,0 +1,67 @@
+service: emoji-intensifies
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: jd-serverless-framework
+  stage: dev
+  region: eu-central-1
+  logRetentionInDays: 1
+  timeout: 15
+  apiGateway:
+    # API Gateway makes it possible to return binary media such as images or files as responses.
+    binaryMediaTypes:
+      - 'image/png'
+      - 'image/jpg'
+      - 'image/gif'
+  usagePlan:
+    quota:
+      limit: 5000
+      offset: 2
+      period: MONTH
+    throttle:
+      burstLimit: 100
+      rateLimit: 50
+
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-prune-plugin
+  - serverless-offline # needs to be last
+
+functions:
+  intensifyImage:
+    handler: src/server.handler # The function name mapped of the application
+    description: "API to turn an emoji into an intensified version"
+    memorySize: 128
+    layers:
+      # Deployed https://github.com/serverlesspub/imagemagick-aws-lambda-2 separately as layer first!
+      - arn:aws:lambda:eu-central-1:762568276642:layer:image-magick:1
+    events:
+      # Type of event, the http event selected, it's event is a endpoint mapped on api gateway
+      - http:
+          path: intensify
+          method: post
+          request:
+            contentHandling: CONVERT_TO_BINARY
+
+            # https://medium.com/swlh/upload-binary-files-to-s3-using-aws-api-gateway-with-aws-lambda-2b4ba8c70b8e
+            # https://www.serverless.com/framework/docs/providers/aws/events/apigateway#pass-through-behavior
+            passThrough: WHEN_NO_TEMPLATES
+            template:
+              image/png: '{"content": "$input.body"}'
+              image/gif: '{"content": "$input.body"}'
+              image/jpeg: '{"content": "$input.body"}'
+          response:
+            contentHandling: CONVERT_TO_BINARY
+
+custom:
+  apigwBinary:
+    types:
+      - 'image/jpeg'
+      - 'image/gif'
+      - 'image/png'
+      - 'text/html'
+  prune:
+    automatic: true
+    number: 2
