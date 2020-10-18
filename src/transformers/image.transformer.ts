@@ -24,7 +24,7 @@ export class ImageTransformer {
 
         // Detect image size
         const { width, height } = imageSize(buffer);
-        console.log(`Image uploaded with dimensions ${width}x${height}`);
+        console.log(`Image ${filename} uploaded with dimensions ${width}x${height} and buffer size ${buffer.length}`);
 
         // Add 10% padding to our width and height, then scale to 128x128
         const img = im(buffer)
@@ -65,12 +65,10 @@ export class ImageTransformer {
 
         // Combine the frames into an animated GIF
         // @ts-ignore
-        const gifImg = gm();
-        frames.forEach((frame) => gifImg.in(frame));
-        gifImg
+        const gifImg = im()
             .delay(1 / 30) // 30fps
-            .background("none")
-            .dispose("Previous"); // Erase each previous frame before showing the next one
+            .in("-dispose", "Background"); // Erase each previous frame before showing the next one
+        frames.forEach((frame) => gifImg.in(frame));
 
         return this.toBuffer(gifImg).finally(() => this.removeTemporaryFiles(frames));
     }

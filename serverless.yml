@@ -28,7 +28,7 @@ provider:
 plugins:
   - serverless-plugin-typescript
   - serverless-prune-plugin
-  - serverless-offline # needs to be last
+  - serverless-offline
 
 functions:
   intensifyImage:
@@ -44,10 +44,10 @@ functions:
           path: intensify
           method: post
           cors: true
-          request:
-            contentHandling: CONVERT_TO_BINARY
-          response:
-            contentHandling: CONVERT_TO_BINARY
+          # request:
+          #   contentHandling: CONVERT_TO_BINARY
+          # response:
+          #   contentHandling: CONVERT_TO_BINARY
 
 custom:
   prune:
