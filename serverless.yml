@@ -14,6 +14,7 @@ provider:
       - 'image/png'
       - 'image/jpg'
       - 'image/gif'
+      - 'multipart/form-data' # https://css-tricks.com/building-your-first-serverless-service-with-aws-lambda-functions/
   usagePlan:
     quota:
       limit: 5000
@@ -31,9 +32,9 @@ plugins:
 
 functions:
   intensifyImage:
-    handler: src/server.handler # The function name mapped of the application
+    handler: src/handler.intensify
     description: "API to turn an emoji into an intensified version"
-    memorySize: 128
+    memorySize: 1024
     layers:
       # Deployed https://github.com/serverlesspub/imagemagick-aws-lambda-2 separately as layer first!
       - arn:aws:lambda:eu-central-1:762568276642:layer:image-magick:1
@@ -42,26 +43,20 @@ functions:
       - http:
           path: intensify
           method: post
+          cors: true
           request:
             contentHandling: CONVERT_TO_BINARY
-
-            # https://medium.com/swlh/upload-binary-files-to-s3-using-aws-api-gateway-with-aws-lambda-2b4ba8c70b8e
-            # https://www.serverless.com/framework/docs/providers/aws/events/apigateway#pass-through-behavior
-            passThrough: WHEN_NO_TEMPLATES
-            template:
-              image/png: '{"content": "$input.body"}'
-              image/gif: '{"content": "$input.body"}'
-              image/jpeg: '{"content": "$input.body"}'
+            # # https://medium.com/swlh/upload-binary-files-to-s3-using-aws-api-gateway-with-aws-lambda-2b4ba8c70b8e
+            # # https://www.serverless.com/framework/docs/providers/aws/events/apigateway#pass-through-behavior
+            # passThrough: WHEN_NO_TEMPLATES
+            # template:
+            #   image/png: '{"content": "$input.body"}'
+            #   image/gif: '{"content": "$input.body"}'
+            #   image/jpeg: '{"content": "$input.body"}'
           response:
             contentHandling: CONVERT_TO_BINARY
 
 custom:
-  apigwBinary:
-    types:
-      - 'image/jpeg'
-      - 'image/gif'
-      - 'image/png'
-      - 'text/html'
   prune:
     automatic: true
     number: 2
