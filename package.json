@@ -21,6 +21,7 @@
     "dependencies": {
         "aws-lambda": "^1.0.6",
         "gm": "^1.23.1",
+        "image-size": "^0.9.1",
         "lambda-multipart-parser": "0.0.2"
     }
 }
