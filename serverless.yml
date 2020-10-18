@@ -25,9 +25,9 @@ provider:
       rateLimit: 50
 
 plugins:
-  - serverless-plugin-typescript
   - serverless-prune-plugin
   - serverless-offline
+  - serverless-webpack # Bundling our resources to save space and improve cold start times
 
 functions:
   intensifyImage:
