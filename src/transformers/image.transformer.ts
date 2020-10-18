@@ -1,28 +1,35 @@
 import gm from "gm";
 import tmp from "tmp";
+import fs from "fs";
 import { imageSize } from "image-size";
 import { MultipartFile } from "../types/multipart-file.type";
 
-// Make sure to have imagmagick (lambda layer) or with brew install imagemagick!
+// Make sure to have imagemagick (lambda layer) or with brew install imagemagick!
 const im = gm.subClass({ imageMagick: true });
 
-const defaultOptions = {
+const defaultOptions: ImageTransformOptions = {
     frameCount: 10, // Number of frames of shaking
     delta: 6, // Max pixels to move while shaking
 };
 
+export interface ImageTransformOptions {
+    frameCount?: number;
+    delta?: number;
+}
+
 export class ImageTransformer {
-    public static async intensifyImage(image: MultipartFile, options = defaultOptions): Promise<Buffer> {
+    public static async intensifyImage(image: MultipartFile, options: ImageTransformOptions = {}): Promise<Buffer> {
+        options = { ...defaultOptions, ...options };
         const { filename, content: buffer } = image;
 
         // Detect image size
         const { width, height } = imageSize(buffer);
         console.log(`Image uploaded with dimensions ${width}x${height}`);
 
-        // Add 10% padding to width and height, then scale to 128x128
+        // Add 10% padding to our width and height, then scale to 128x128
         const img = im(buffer)
             .gravity("Center")
-            .in("-background", " none")
+            .background("none")
             .extent(width + width / 10, height + height / 10)
             .geometry(128, 128);
         const imgBuffer = await this.toBuffer(img);
@@ -30,24 +37,23 @@ export class ImageTransformer {
         // Generate some shaky frames
         const frames = [];
         for (let frameIndex = 0; frameIndex < options.frameCount; frameIndex++) {
-            const x = this.getRandomXYNumber(-options.delta, +options.delta);
-            const y = this.getRandomXYNumber(-options.delta, +options.delta);
+            const xOffset = this.getRandomOffset(-options.delta, +options.delta);
+            const yOffset = this.getRandomOffset(-options.delta, +options.delta);
 
-            // Create a tmp object
+            // Create a tmp object to write our gif frame to
             const tmpobj = tmp.fileSync({
                 prefix: filename + "-frame" + frameIndex,
+                postfix: ".gif",
             });
-
             const frameTmpFilename = await new Promise((resolve, reject) => {
                 try {
                     im(imgBuffer)
-                        .in("-page", `${x}${y}`)
+                        .in("-page", `${xOffset}${yOffset}`)
                         .flatten()
-                        .write(tmpobj.name, (err, callback) => {
+                        .write(tmpobj.name, (err) => {
                             if (err) {
                                 throw err;
                             }
-                            console.log("Writing", tmpobj.name);
                             resolve(tmpobj.name);
                         });
                 } catch (err) {
@@ -57,19 +63,24 @@ export class ImageTransformer {
             frames.push(frameTmpFilename);
         }
 
-        // Combine the frames into a GIF
-        console.log("Combining");
-        let gifImg = im(imgBuffer);
-        console.log(frames);
+        // Combine the frames into an animated GIF
+        // @ts-ignore
+        const gifImg = gm();
         frames.forEach((frame) => gifImg.in(frame));
-        gifImg = gifImg.in("-delay", "1x30").in("-background", "none").dispose("Background").in("-loop", "0");
-        //gifImg = gifImg.in("-background", "none").dispose("Background").in("-delay", "1x30").loop(0);
-        return this.toBuffer(gifImg);
+        gifImg
+            .delay(1 / 30) // 30fps
+            .background("none")
+            .dispose("Previous"); // Erase each previous frame before showing the next one
+
+        return this.toBuffer(gifImg).finally(() => this.removeTemporaryFiles(frames));
     }
 
-    public static toBuffer(img: gm.State): Promise<Buffer> {
+    /**
+     * Turn a gm state object into a Buffer
+     */
+    public static toBuffer(img: gm.State, imageFormat = "gif"): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            img.toBuffer("gif", (err, buffer) => {
+            img.toBuffer(imageFormat, (err, buffer) => {
                 if (err) return reject(err);
 
                 return resolve(buffer);
@@ -80,12 +91,20 @@ export class ImageTransformer {
     /**
      * Returns a random number between min (inclusive) and max (exclusive)
      */
-    public static getRandomXYNumber(min: number, max: number): string {
+    public static getRandomOffset(min: number, max: number): string {
         min = Math.ceil(min);
         max = Math.floor(max);
         const random = Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // Always ensure a "+" or "-" is prefixed
+        // Always ensure that our number is prefixed with "+" or "-" for GM to be used as offset
+        // http://www.graphicsmagick.org/GraphicsMagick.html#details-page
         return (random < 0 ? "" : "+") + random;
+    }
+
+    /**
+     * Cleanup the temporary files we created for our animated gif
+     */
+    public static removeTemporaryFiles(frames: string[]) {
+        frames.forEach((frame) => fs.unlinkSync(frame));
     }
 }

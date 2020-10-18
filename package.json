@@ -12,6 +12,7 @@
     "devDependencies": {
         "@types/aws-lambda": "^8.10.64",
         "@types/gm": "^1.18.9",
+        "@types/tmp": "^0.2.0",
         "serverless": "^2.7.0",
         "serverless-offline": "^6.8.0",
         "serverless-plugin-typescript": "^1.1.9",

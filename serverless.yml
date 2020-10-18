@@ -46,13 +46,6 @@ functions:
           cors: true
           request:
             contentHandling: CONVERT_TO_BINARY
-            # # https://medium.com/swlh/upload-binary-files-to-s3-using-aws-api-gateway-with-aws-lambda-2b4ba8c70b8e
-            # # https://www.serverless.com/framework/docs/providers/aws/events/apigateway#pass-through-behavior
-            # passThrough: WHEN_NO_TEMPLATES
-            # template:
-            #   image/png: '{"content": "$input.body"}'
-            #   image/gif: '{"content": "$input.body"}'
-            #   image/jpeg: '{"content": "$input.body"}'
           response:
             contentHandling: CONVERT_TO_BINARY
 
