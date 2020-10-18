@@ -4,26 +4,25 @@ provider:
   name: aws
   runtime: nodejs12.x
   profile: jd-serverless-framework
-  stage: dev
+  stage: prod
   region: eu-central-1
   logRetentionInDays: 1
-  timeout: 15
+  timeout: 10
   apiGateway:
     # API Gateway makes it possible to return binary media such as images or files as responses.
     binaryMediaTypes:
       - 'image/png'
       - 'image/jpg'
       - 'image/gif'
-      - 'multipart/form-data' # https://css-tricks.com/building-your-first-serverless-service-with-aws-lambda-functions/
+      - 'multipart/form-data'
   usagePlan:
     quota:
-      limit: 5000
+      limit: 1000
       offset: 2
       period: MONTH
     throttle:
       burstLimit: 100
       rateLimit: 50
-
 
 plugins:
   - serverless-plugin-typescript
@@ -44,10 +43,6 @@ functions:
           path: intensify
           method: post
           cors: true
-          # request:
-          #   contentHandling: CONVERT_TO_BINARY
-          # response:
-          #   contentHandling: CONVERT_TO_BINARY
 
 custom:
   prune:
