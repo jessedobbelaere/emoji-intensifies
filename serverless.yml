@@ -28,6 +28,7 @@ plugins:
   - serverless-prune-plugin
   - serverless-offline
   - serverless-webpack # Bundling our resources to save space and improve cold start times
+  - fullstack-serverless # Frontend deployment
 
 functions:
   intensifyImage:
@@ -48,3 +49,14 @@ custom:
   prune:
     automatic: true
     number: 2
+  fullstack:
+    # domain: '${self:custom.domains.${self:provider.stage}}'
+    # certificate: arn:aws:acm:us-east-1:030731221117:certificate/08b634e0-2d89-49d5-bc21-b18f85cafed9
+    bucketName: ${self:service}
+    distributionFolder: frontend/build
+    clientCommand: npm run build
+    clientSrcPath: frontend
+    indexDocument: index.html
+    errorDocument: index.html
+    singlePageApp: true
+    compressWebContent: true

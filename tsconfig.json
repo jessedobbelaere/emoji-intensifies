@@ -1,13 +1,13 @@
 {
-  "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "lib": ["esnext"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "outDir": "lib",
-    "sourceMap": true,
-    "target": "esnext"
-  },
-  "exclude": ["node_modules"]
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "lib": ["esnext"],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "outDir": "lib",
+        "sourceMap": true,
+        "target": "esnext"
+    },
+    "exclude": ["node_modules", "frontend"]
 }

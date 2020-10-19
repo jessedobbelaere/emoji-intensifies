@@ -22,12 +22,8 @@ module.exports = {
             {
                 test: /\.ts$/,
                 loader: "ts-loader",
-                options: {
-                    transpileOnly: true,
-                    experimentalWatchApi: true,
-                },
                 include: [__dirname],
-                exclude: /node_modules/,
+                exclude: [/node_modules/, /frontend/],
             },
         ],
     },

@@ -67,6 +67,7 @@ export class ImageTransformer {
         // @ts-ignore
         const gifImg = im()
             .delay(1 / 30) // 30fps
+            .in("-loop", "0")
             .in("-dispose", "Previous"); // Erase each previous frame before showing the next one
         frames.forEach((frame) => gifImg.in(frame));
 
