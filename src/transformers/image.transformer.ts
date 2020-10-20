@@ -65,10 +65,7 @@ export class ImageTransformer {
 
         // Combine the frames into an animated GIF
         // @ts-ignore
-        const gifImg = im()
-            .delay(1 / 30) // 30fps
-            .in("-loop", "0")
-            .in("-dispose", "Previous"); // Erase each previous frame before showing the next one
+        const gifImg = im().in("-delay", "1x30").in("-loop", "0").in("-dispose", "Previous"); // Erase each previous frame before showing the next one
         frames.forEach((frame) => gifImg.in(frame));
 
         return this.toBuffer(gifImg).finally(() => this.removeTemporaryFiles(frames));
