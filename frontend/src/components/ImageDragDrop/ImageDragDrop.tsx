@@ -34,7 +34,7 @@ export default function ImageDragDrop(): ReactElement {
         getResponseData: (responseText: any, response: any) => {
             // Return the entire XHR response because we work with blobs.
             // We also patch the xhr-upload package because it crashes on xhr.responseText
-            // https://github.com/facebook/react/issues/18279
+            // https://github.com/transloadit/uppy/issues/2434
             return response;
         },
     });
