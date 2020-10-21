@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useState } from "react";
 
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
@@ -8,6 +8,8 @@ import "@uppy/dashboard/dist/style.min.css";
 import "@uppy/url/dist/style.min.css";
 
 export default function ImageDragDrop(): ReactElement {
+    const [imageBlobUrl, setImageBlobUrl] = useState<string | null>(null);
+
     // Create an instance once and remember it for all rerenders
     const uppy = Uppy({
         restrictions: {
@@ -28,31 +30,35 @@ export default function ImageDragDrop(): ReactElement {
             Accept: "image/gif",
         },
         timeout: 10 * 1000, // 10 seconds timeout
-        limit: 1, // 1 upload at a time
+        limit: 1, // 1 upload at a time,
+        getResponseData: (responseText: any, response: any) => {
+            // Return the entire XHR response because we work with blobs.
+            // We also patch the xhr-upload package because it crashes on xhr.responseText
+            // https://github.com/facebook/react/issues/18279
+            return response;
+        },
     });
 
-    uppy.on("complete", (result) => {
-        console.log("COMPLETE");
-        console.log(result);
+    uppy.on("complete", (result: any) => {
+        const blob = result.successful[0].response.body.response;
+        console.log(blob);
+        const url = window.URL.createObjectURL(blob);
+        setImageBlobUrl(url);
     });
 
     return (
         <div>
-            <Dashboard
-                uppy={uppy}
-                width="100%"
-                theme="dark"
-                note="Emoji images up to 200×200px"
-                // locale={{
-                //     strings: {
-                //         // Text to show on the droppable area.
-                //         // `%{browse}` is replaced with a link that opens the system file selection dialog.
-                //         dropHereOr: "Drop emoji here or %{browse}",
-                //         // Used as the label for the link that opens the system file selection dialog.
-                //         browse: "browse",
-                //     },
-                // }}
-            />
+            {!imageBlobUrl && <Dashboard uppy={uppy} width="100%" theme="dark" note="Emoji images up to 200×200px" />}
+            {imageBlobUrl && (
+                <div>
+                    <img src={imageBlobUrl} alt="intensified" />
+                    <p>
+                        <a className="another-one" href="/">
+                            Upload another one?
+                        </a>
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

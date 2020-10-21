@@ -1,0 +1,64 @@
+diff --git a/node_modules/@uppy/xhr-upload/lib/index.js b/node_modules/@uppy/xhr-upload/lib/index.js
+index cab05c9..2ed18f4 100644
+--- a/node_modules/@uppy/xhr-upload/lib/index.js
++++ b/node_modules/@uppy/xhr-upload/lib/index.js
+@@ -303,8 +303,8 @@ module.exports = (_temp = _class = /*#__PURE__*/function (_Plugin) {
+           _this3.uploaderEvents[file.id] = null;
+         }
+ 
+-        if (opts.validateStatus(ev.target.status, xhr.responseText, xhr)) {
+-          var body = opts.getResponseData(xhr.responseText, xhr);
++        if (opts.validateStatus(ev.target.status, "blob", xhr)) {
++          var body = opts.getResponseData("blob", xhr);
+           var uploadURL = body[opts.responseUrlFieldName];
+           var uploadResp = {
+             status: ev.target.status,
+@@ -320,9 +320,9 @@ module.exports = (_temp = _class = /*#__PURE__*/function (_Plugin) {
+ 
+           return resolve(file);
+         } else {
+-          var _body = opts.getResponseData(xhr.responseText, xhr);
++          var _body = opts.getResponseData("blob", xhr);
+ 
+-          var error = buildResponseError(xhr, opts.getResponseError(xhr.responseText, xhr));
++          var error = buildResponseError(xhr, opts.getResponseError("blob", xhr));
+           var response = {
+             status: ev.target.status,
+             body: _body
+@@ -345,7 +345,7 @@ module.exports = (_temp = _class = /*#__PURE__*/function (_Plugin) {
+           _this3.uploaderEvents[file.id] = null;
+         }
+ 
+-        var error = buildResponseError(xhr, opts.getResponseError(xhr.responseText, xhr));
++        var error = buildResponseError(xhr, opts.getResponseError("blob", xhr));
+ 
+         _this3.uppy.emit('upload-error', file, error);
+ 
+@@ -546,8 +546,8 @@ module.exports = (_temp = _class = /*#__PURE__*/function (_Plugin) {
+       xhr.addEventListener('load', function (ev) {
+         timer.done();
+ 
+-        if (_this5.opts.validateStatus(ev.target.status, xhr.responseText, xhr)) {
+-          var body = _this5.opts.getResponseData(xhr.responseText, xhr);
++        if (_this5.opts.validateStatus(ev.target.status, "blob", xhr)) {
++          var body = _this5.opts.getResponseData("blob", xhr);
+ 
+           var uploadResp = {
+             status: ev.target.status,
+@@ -559,14 +559,14 @@ module.exports = (_temp = _class = /*#__PURE__*/function (_Plugin) {
+           return resolve();
+         }
+ 
+-        var error = _this5.opts.getResponseError(xhr.responseText, xhr) || new Error('Upload error');
++        var error = _this5.opts.getResponseError("blob", xhr) || new Error('Upload error');
+         error.request = xhr;
+         emitError(error);
+         return reject(error);
+       });
+       xhr.addEventListener('error', function (ev) {
+         timer.done();
+-        var error = _this5.opts.getResponseError(xhr.responseText, xhr) || new Error('Upload error');
++        var error = _this5.opts.getResponseError("blob", xhr) || new Error('Upload error');
+         emitError(error);
+         return reject(error);
+       });
