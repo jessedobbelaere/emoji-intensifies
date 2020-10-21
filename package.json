@@ -27,6 +27,7 @@
         "image-size": "^0.9.1",
         "lambda-multipart-parser": "0.0.2",
         "serverless-webpack": "^5.3.5",
-        "tmp": "^0.2.1"
+        "tmp": "^0.2.1",
+        "universal-analytics": "^0.4.23"
     }
 }

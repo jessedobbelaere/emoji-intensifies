@@ -1,16 +1,18 @@
 import { Context } from "aws-lambda";
 import * as parser from "lambda-multipart-parser";
 import { ImageTransformer } from "../transformers/image.transformer";
+import ua from "universal-analytics";
 
-const CorsResponse = (obj, statusCode = 200, customHeaders = {}) => ({
+const GA_TRACKING_ID = "UA-51465635-3";
+
+const CorsResponse = (obj, statusCode = 200) => ({
     statusCode,
     headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Methods": "*",
-        ...customHeaders,
     },
-    body: Buffer.isBuffer(obj) ? obj : JSON.stringify(obj),
+    body: JSON.stringify(obj),
 });
 
 export class IntensifyController {
@@ -26,6 +28,10 @@ export class IntensifyController {
 
         // Transform image to animated gif
         const animatedImage = await ImageTransformer.intensifyImage(uploadedFile);
+
+        // Track succesful processed image
+        const visitor = ua(GA_TRACKING_ID);
+        visitor.event("Emoji", "Processed", "filename", uploadedFile.filename).send();
 
         return {
             statusCode: 200,
